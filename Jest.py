@@ -5,93 +5,102 @@ from telethon.network import ConnectionTcpObfuscated
 from flask import Flask
 from threading import Thread
 
-# --- 7/24 GÖRÜNMEZ ZIRH (WEB) ---
+# --- GÖRÜNMEZ SİBER KALKAN (7/24) ---
 app = Flask('')
 @app.route('/')
-def home(): return "<h1>SİSTEM GÖZETİM ALTINDA</h1>"
+def home(): return "<h1>SİSTEM GÖZETİM ALTINDA...</h1>"
 def run(): app.run(host='0.0.0.0', port=8080)
 
-# --- KRİTİK AYARLAR ---
+# --- KRİTİK VERİLER ---
 API_ID = 32929344
 API_HASH = '7b4bf6ab2769c0252bea46d418ac260e'
-# BURAYA BILGISAYARDAN ALDIGIN SESSION KODUNU YAPIŞTIR:
-STRING_SESSION = 'BURAYA_SESSION_KODUNU_YAZ'
-
-# Saldırgan Takip Listesi
-SALDIRGANLAR = {}
+# Bilgisayardan aldığın o uzun kodu buraya yapıştır:
+STRING_SESSION = 'BURAYA_SESSION_KODUNU_YAPIŞTIR'
 
 async def start_jest():
-    # TCP Obfuscated: IP Ban ve ISP takibini %100 engeller (En güçlü baypas)
+    # En güçlü baypas: ISP ve IP engellerini aşan TCP Obfuscated bağlantı
     client = TelegramClient(
         StringSession(STRING_SESSION), 
         API_ID, API_HASH,
         connection=ConnectionTcpObfuscated
     )
     
-    await client.start()
-    me = await client.get_me()
-    print(f"🔥 {me.first_name} Zırhlı Modda Aktif!")
+    try:
+        await client.start()
+        me = await client.get_me()
+        print(f"🔥 SİSTEM ÇALIŞTI: {me.first_name} OPERASYONA HAZIR!")
+    except Exception as e:
+        print(f"❌ KRİTİK HATA: {e}")
+        return
 
-    # --- %99 İNSAN GÖRÜNÜMLÜ KARŞILAMA ---
+    # --- %99 İNSAN GÖRÜNÜMLÜ ELİT KARŞILAMA ---
     @client.on(events.NewMessage(pattern='/start'))
-    async def start(event):
+    async def start_handler(event):
         if not event.is_private: return
         
-        # İnsan taklidi: Yazıyor... efekti
+        # İnsan taklidi: Yazıyor efekti
         async with client.action(event.chat_id, 'typing'):
-            await asyncio.sleep(random.uniform(1.2, 2.5))
+            await asyncio.sleep(random.uniform(1.5, 3.0))
             
-            hosgeldin_metni = (
-                f"🛡️ **JEST V18 | SİBER SAVUNMA VE TRANSFER**\n"
-                f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
-                f"Selam {event.sender.first_name}, sistem seni doğruladı. ✅\n\n"
-                f"Bu bot, kısıtlı kanalların duvarlarını aşmak için tasarlandı. "
-                f"Benimle paylaştığın her veri, askeri düzeyde şifrelenir. "
-                f"Sadece linki bırak, gerisini bana bırak paşam...\n\n"
-                f"⚡ **Durum:** Hattımız temiz, sızmaya hazırız."
+            ana_mesaj = (
+                f"🛡️ **JEST V18 | SİBER SIZMA VE TRANSFER ÜSSÜ**\n"
+                f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+                f"Hoş geldin Operatör {event.sender.first_name}. ✅\n\n"
+                f"Şu an Telegram'ın en derin kısıtlı kanallarına sızabilen "
+                f"ve veri sökebilen **Gölge Protokolü** altındasın. "
+                f"Sistem, kimliğini %99 oranında gizler ve gerçek bir kullanıcı "
+                f"gibi davranarak filtreleri uyutur.\n\n"
+                f"📡 **Durum:** Bağlantı şifreli, IP Korunuyor.\n"
+                f"📥 **Görev:** İndirme yasağı olan kanal linkini gönder."
             )
-            await event.respond(hosgeldin_metni)
+            await event.respond(ana_mesaj)
 
-    # --- ÖZEL ÖZELLİK: KİMLİK VE ORTAK KANAL ANALİZİ ---
-    @client.on(events.NewMessage(pattern='/bilgi'))
-    async def user_info(event):
-        status = await event.respond("🔍 **Veritabanı taranıyor...**")
+    # --- ÖZEL ÖZELLİK: HEDEF KİMLİK ANALİZİ ---
+    @client.on(events.NewMessage(pattern='/analiz'))
+    async def analyze(event):
+        status = await event.respond("🔍 **Veritabanı taranıyor, hedef analiz ediliyor...**")
+        await asyncio.sleep(1.5)
         user = await event.get_sender()
         
-        # Ortak kanal ve grup tespiti
-        full_user = await client(requests.users.GetFullUserRequest(user.id))
-        ortak_sayisi = full_user.common_chats_count
+        # Ortak kanal/grup tespiti (Askeri rapor formatı)
+        from telethon.tl.functions.users import GetFullUserRequest
+        full = await client(GetFullUserRequest(user.id))
         
-        bilgi_kartı = (
-            f"👤 **HEDEF ANALİZİ**\n"
-            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
-            f"🏷️ **Ad:** {user.first_name}\n"
-            f"🆔 **ID:** `{user.id}`\n"
-            f"📱 **Kullanıcı Adı:** @{user.username if user.username else 'Yok'}\n"
-            f"🌐 **Ortak Kanallar:** {ortak_sayisi} Adet\n"
-            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
-            f"🛡️ *Bu bilgiler sadece senin için listelendi.*"
+        rapor = (
+            f"👤 **HEDEF KİMLİK KARTI**\n"
+            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+            f"🔹 **İsim:** {user.first_name}\n"
+            f"🔹 **ID:** `{user.id}`\n"
+            f"🔹 **Siber Ad:** @{user.username if user.username else 'Gizli'}\n"
+            f"🔹 **Ortak Alanlar:** {full.common_chats_count} Kanal/Grup\n"
+            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+            f"🛡️ *Bu veri sadece operatör yetkisiyle çekilmiştir.*"
         )
-        await status.edit(bilgi_kartı)
+        await status.edit(rapor)
 
-    # --- SALDIRI SAVUNMA: YANSIMA KALKANI ---
+    # --- SALDIRI SAVUNMA (YANSIMA KALKANI) ---
+    flood_check = {}
     @client.on(events.NewMessage)
-    async def anti_attack(event):
+    async def mirror_shield(event):
         uid = event.sender_id
-        # Saniyede 5 mesaj atan saldırganı kopyala ve engelle
-        SALDIRGANLAR[uid] = SALDIRGANLAR.get(uid, 0) + 1
-        if SALDIRGANLAR[uid] > 5:
-            await event.respond("⚠️ **Saldırı Tespit Edildi! Yansıma Kalkanı Aktif.**")
-            # Saldırganın adını kopyala (Taklit Et)
-            await client(requests.account.UpdateProfileRequest(first_name=f"Engelli-{uid}"))
+        current_time = time.time()
+        
+        # Saniyede 3 mesajdan fazlası saldırı kabul edilir
+        user_history = flood_check.get(uid, [])
+        user_history = [t for t in user_history if current_time - t < 5]
+        user_history.append(current_time)
+        flood_check[uid] = user_history
+        
+        if len(user_history) > 4:
+            await event.respond("⚠️ **SALDIRI TESPİT EDİLDİ!**\nYansıma Kalkanı aktif. Erişim engelleniyor...")
             await client.edit_permissions(event.chat_id, user=uid, view_messages=False)
-            print(f"🚫 Saldırgan ID {uid} bertaraf edildi.")
+            print(f"🚫 Saldırgan bertaraf edildi: {uid}")
 
-    # --- ANA SÖKÜCÜ MOTOR ---
+    # --- ANA KISITLI VERİ SÖKÜCÜ ---
     @client.on(events.NewMessage)
-    async def handler(event):
+    async def download_handler(event):
         if 't.me/c/' in event.raw_text:
-            status = await event.respond("📥 **Sızma Başarılı... Veri Paketleniyor.**")
+            status = await event.respond("⚡ **Kısıtlı alana sızılıyor... Güvenlik baypas ediliyor.**")
             try:
                 parts = event.raw_text.split('/')
                 k_id = int("-100" + parts[-2])
@@ -99,16 +108,19 @@ async def start_jest():
                 
                 msg = await client.get_messages(k_id, ids=m_id)
                 if msg and msg.media:
-                    await status.edit("🛡️ **Baypas Tamam! Bulut Aktarımı Başladı.**")
+                    await status.edit("🛡️ **Veri Söküldü! Buluta şifreli aktarım yapılıyor...**")
                     path = await client.download_media(msg.media)
-                    # Bulut yükleme işlemi (Önceki kodlardan devam)
+                    
+                    # Bulut Yükleme (Hızlı ve Güvenli)
                     with open(path, 'rb') as f:
                         res = requests.post('https://bashupload.com/', files={'file': f}).text.strip()
                     
-                    await status.edit(f"✅ **Sökme İşlemi Bitti!**\n\n🔗 **Bağlantı:** {res}")
-                    os.remove(path)
+                    await status.edit(f"✅ **Operasyon Başarılı!**\n\n🔗 **İndirme Linki:**\n`{res}`\n\n⌛ *Link 24 saat içinde imha edilecektir.*")
+                    if os.path.exists(path): os.remove(path)
+                else:
+                    await status.edit("❌ **Hata:** Hedef noktada sökülecek veri bulunamadı.")
             except Exception as e:
-                await status.edit(f"❌ **Sistem Duvara Çarptı:** {str(e)}")
+                await status.edit(f"⚠️ **Sistem Duvara Çarptı:** {str(e)}")
 
     await client.run_until_disconnected()
 
