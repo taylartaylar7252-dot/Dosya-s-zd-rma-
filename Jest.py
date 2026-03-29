@@ -37,4 +37,3 @@ async def start_jest():
 if __name__ == "__main__":
     Thread(target=run).start()
     asyncio.run(start_jest())
-    
