@@ -1,59 +1,71 @@
-import os, asyncio, requests, random, time
+import os, asyncio, requests
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from flask import Flask
 from threading import Thread
 
-# --- 7/24 AKTİF TUTMA ---
+# --- 7/24 AKTİF TUTMA (RENDER İÇİN ŞART) ---
 app = Flask('')
 @app.route('/')
-def home(): return "SİSTEM ÇEVRİMİÇİ"
-def run(): app.run(host='0.0.0.0', port=8080)
+def home(): return "SİSTEM AKTİF"
+def run(): app.run(host='0.0.0.0', port=10000)
 
 # --- AYARLAR ---
 API_ID = 32929344
 API_HASH = '7b4bf6ab2769c0252bea46d418ac260e'
-# Render Paneli -> Environment kısmına OTURUM_KODU adıyla ekle
-OTURUM = os.environ.get('OTURUM_KODU')
+# Render Paneli -> Settings -> Environment Variables -> 'OTURUM' adıyla session ekle
+STRING_SESSION = os.environ.get('OTURUM')
 
-async def start_jest():
-    if not OTURUM:
-        print("❌ HATA: OTURUM_KODU bulunamadı! Render ayarlarına ekle.")
+async def start_bot():
+    if not STRING_SESSION:
+        print("❌ HATA: 'OTURUM' değişkeni Render panelinde bulunamadı!")
         return
 
-    # Userbot olarak giriş (Kısıtlı kanallara senin yetkinle sızar)
-    client = TelegramClient(StringSession(OTURUM), API_ID, API_HASH)
-    await client.start()
-    print("🔥 JEST V18 SAHADA!")
-
-    @client.on(events.NewMessage(pattern='/start'))
-    async def start(event):
-        if not event.is_private: return
-        async with client.action(event.chat_id, 'typing'):
-            await asyncio.sleep(1)
-            await event.respond("🚀 **JEST V18 AKTİF!**\n\nPaşam linki at, saniyeler içinde sökeyim.")
+    # Userbot girişi: Kısıtlı kanallara sızmanın tek yolu
+    client = TelegramClient(StringSession(STRING_SESSION), API_ID, API_HASH)
+    
+    try:
+        await client.start()
+        print("✅ SÖKÜCÜ MOTOR ÇALIŞTI!")
+    except Exception as e:
+        print(f"❌ GİRİŞ HATASI: {e}")
+        return
 
     @client.on(events.NewMessage)
-    async def handler(event):
-        if 't.me/c/' in event.raw_text:
+    async def sökücü(event):
+        # Sadece özel mesajda ve kısıtlı link gelince çalış
+        if event.is_private and 't.me/c/' in event.raw_text:
             status = await event.respond("⚡ **Sızılıyor...**")
             try:
+                # Linkten ID ve Mesaj No çekme
                 parts = event.raw_text.split('/')
-                k_id, m_id = int("-100" + parts[-2]), int(parts[-1])
+                k_id = int("-100" + parts[-2])
+                m_id = int(parts[-1])
+                
+                # Mesajı çek
                 msg = await client.get_messages(k_id, ids=m_id)
                 
                 if msg and msg.media:
-                    await status.edit("🛡️ **Bypass başarılı! Buluta aktarılıyor...**")
+                    await status.edit("🛡️ **Bypass yapıldı. Dosya sökülüyor...**")
                     path = await client.download_media(msg.media)
+                    
+                    # Buluta Yükleme (BashUpload - Hızlı ve Kayıtsız)
+                    await status.edit("☁️ **Buluta yükleniyor...**")
                     with open(path, 'rb') as f:
                         res = requests.post('https://bashupload.com/', files={'file': f}).text.strip()
-                    await status.edit(f"✅ **Söküldü!**\n\n🔗 **Link:** `{res}`")
-                    os.remove(path)
+                    
+                    # Sonuç Linki
+                    await status.edit(f"✅ **Sökme Başarılı!**\n\n🔗 **Link:** `{res}`")
+                    if os.path.exists(path): os.remove(path)
+                else:
+                    await status.edit("❌ **Hata:** Linkte dosya yok.")
             except Exception as e:
-                await status.edit(f"⚠️ **Hata:** {str(e)}")
+                await status.edit(f"⚠️ **Sistem Hatası:** {str(e)}")
 
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
-    Thread(target=run, daemon=True).start()
-    asyncio.run(start_jest())
+    # Flask sunucusunu arka planda başlat
+    Thread(target=run).start()
+    # Botu ana döngüde başlat
+    asyncio.run(start_bot())
