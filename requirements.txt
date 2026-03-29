@@ -1,0 +1,12 @@
+telethon
+flask
+requests
+nest_asyncio
+cryptg
+pyaes
+hachoir
+aiohttp
+multidict
+async_generator
+typing-extensions
+pytz
